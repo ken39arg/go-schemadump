@@ -1,4 +1,4 @@
-package shemadump
+package schemadump
 
 import (
 	"database/sql"
