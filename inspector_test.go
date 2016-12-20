@@ -175,7 +175,7 @@ func TestInspect(t *testing.T) {
 				Columns: []Column{
 					Column{"ID", "uint64", false, 20, "NULL", "auto_increment", "id", "bigint(20) unsigned"},
 					Column{"Name", "string", false, 100, "NULL", "", "name", "varchar(100)"},
-					Column{"Description", "string", true, 0, "NULL", "", "description", "text"},
+					Column{"Description", "sql.NullString", true, 0, "NULL", "", "description", "text"},
 					Column{"Valid", "int8", false, 1, "0", "", "valid", "tinyint(1)"},
 					Column{"ScoreRate", "float64", false, 10, "1.00", "", "score_rate", "decimal(10,2)"},
 					Column{"CreatedAt", "time.Time", false, 0, "NULL", "", "created_at", "datetime"},
@@ -217,6 +217,8 @@ func TestInspect(t *testing.T) {
 			ddl: `CREATE TABLE user_item (
 				user_id   bigint  unsigned not null,
 				item_id   bigint  unsigned not null,
+				sort      float   not null default 0,
+				power     double  not null default 0,
 				created_at datetime not null,
 
 				PRIMARY KEY(user_id, item_id),
@@ -228,6 +230,8 @@ func TestInspect(t *testing.T) {
 				Columns: []Column{
 					Column{"UserID", "uint64", false, 20, "NULL", "", "user_id", "bigint(20) unsigned"},
 					Column{"ItemID", "uint64", false, 20, "NULL", "", "item_id", "bigint(20) unsigned"},
+					Column{"Sort", "float32", false, 0, "0", "", "sort", "float"},
+					Column{"Power", "float64", false, 0, "0", "", "power", "double"},
 					Column{"CreatedAt", "time.Time", false, 0, "NULL", "", "created_at", "datetime"},
 				},
 				Indexes: []Index{

@@ -102,7 +102,7 @@ var typeMap = map[string]string{
 	"int":       "int32",
 	"bigint":    "int64",
 	"decimal":   "float64",
-	"float":     "float64",
+	"float":     "float32",
 	"double":    "float64",
 	"char":      "string",
 	"varchar":   "string",
@@ -157,6 +157,9 @@ func (ins *Inspector) inspectColumns(table string) []Column {
 		}
 		if 0 < len(t[3]) {
 			c.Type = "u" + c.Type
+		}
+		if c.Nullable && c.Type == "string" {
+			c.Type = "sql.NullString"
 		}
 		columns = append(columns, c)
 	}
