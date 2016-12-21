@@ -143,13 +143,15 @@ func TestTableFunc(t *testing.T) {
 func TestInspect(t *testing.T) {
 	mysqld, err := mysqltest.NewMysqld(nil)
 	if err != nil {
-		log.Fatalf("Failed to start mysqld: %s", err)
+		t.Errorf("Failed to start mysqld: %s", err)
+		return
 	}
 	defer mysqld.Stop()
 
 	db, err := sql.Open("mysql", mysqld.Datasource("test", "", "", 0))
 	if err != nil {
-		log.Fatalf("Failed to Open mysqld: %s", err)
+		t.Errorf("Failed to Open mysqld: %s", err)
+		return
 	}
 
 	var testCase = []struct {
@@ -245,7 +247,8 @@ func TestInspect(t *testing.T) {
 	for _, test := range testCase {
 		_, e := db.Exec(test.ddl)
 		if e != nil {
-			log.Fatalf("ddl failed: %s SQL{ %s }", e, test.ddl)
+			t.Errorf("ddl failed: %s SQL{ %s }", e, test.ddl)
+			return
 		}
 	}
 

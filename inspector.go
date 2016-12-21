@@ -70,13 +70,13 @@ func NewInspector(db *sql.DB) *Inspector {
 func (ins *Inspector) Inspect() {
 	rows, err := ins.db.Query("SHOW TABLES")
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var table string
 		if err := rows.Scan(&table); err != nil {
-			log.Fatal(err)
+			log.Panic(err)
 		}
 		t := ins.inspectTable(table)
 		ins.Tables = append(ins.Tables, t)
@@ -117,14 +117,14 @@ func (ins *Inspector) inspectColumns(table string) []Column {
 	columns := []Column{}
 	rows, err := ins.db.Query(fmt.Sprintf("SHOW COLUMNS FROM %s", table))
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var fName, fType, fNull, fKey, fExtra string
 		var fDef sql.NullString
 		if err := rows.Scan(&fName, &fType, &fNull, &fKey, &fDef, &fExtra); err != nil {
-			log.Fatal(err)
+			log.Panic(err)
 		}
 		c := Column{
 			Name:     snaker.SnakeToCamel(fName),
@@ -141,7 +141,7 @@ func (ins *Inspector) inspectColumns(table string) []Column {
 		t := typeRe.FindSubmatch([]byte(fType))
 		c.Type = typeMap[string(t[1])]
 		if c.Type == "" {
-			log.Fatal("Undefined type %s", fType)
+			log.Panicf("Undefined type %s", fType)
 		}
 		if 0 < len(t[2]) {
 			sz := string(t[2])
@@ -151,7 +151,7 @@ func (ins *Inspector) inspectColumns(table string) []Column {
 			}
 			size, err := strconv.ParseUint(sz, 10, 32)
 			if err != nil {
-				log.Fatal(err)
+				log.Panic(err)
 			}
 			c.Size = uint32(size)
 		}
@@ -170,7 +170,7 @@ func (ins *Inspector) inspectIndex(table string) []Index {
 	indexes := []Index{}
 	rows, err := ins.db.Query(fmt.Sprintf("SHOW INDEX FROM %s", table))
 	if err != nil {
-		log.Fatal(err)
+		log.Panic(err)
 	}
 	defer rows.Close()
 	idx := 0
@@ -179,7 +179,7 @@ func (ins *Inspector) inspectIndex(table string) []Index {
 		var iNonUnique, iSeqIdx, iCardinality uint32
 		var iCollation, iSubPart, iPacked sql.NullString
 		if err := rows.Scan(&iTable, &iNonUnique, &iName, &iSeqIdx, &iColName, &iCollation, &iCardinality, &iSubPart, &iPacked, &iNull, &iIndexType, &iComment, &iIndexComment); err != nil {
-			log.Fatal(err)
+			log.Panic(err)
 		}
 		if iSeqIdx == 1 {
 			indexes = append(indexes, Index{
@@ -190,7 +190,7 @@ func (ins *Inspector) inspectIndex(table string) []Index {
 			idx = len(indexes) - 1
 		}
 		if indexes[idx].Name != iName {
-			log.Fatal("Index is not seqencial")
+			log.Panic("Index is not seqencial")
 		}
 		indexes[idx].Columns = append(indexes[idx].Columns, iColName)
 	}
