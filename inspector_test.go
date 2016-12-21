@@ -286,4 +286,11 @@ func TestInspect(t *testing.T) {
 		}
 	}
 
+	inspecter = &Inspector{db: db}
+	inspecter.InspectTables("user", "item", "non")
+	if len(inspecter.Tables) != 2 {
+		t.Errorf("Inspect with tables. table size => %d want 2", len(inspecter.Tables), 2)
+		return
+	}
+
 }

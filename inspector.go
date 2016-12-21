@@ -62,9 +62,9 @@ type Inspector struct {
 }
 
 func NewInspector(db *sql.DB) *Inspector {
-	ins := Inspector{db: db}
+	ins := &Inspector{db: db}
 	ins.Inspect()
-	return &ins
+	return ins
 }
 
 func (ins *Inspector) Inspect() {
@@ -80,6 +80,20 @@ func (ins *Inspector) Inspect() {
 		}
 		t := ins.inspectTable(table)
 		ins.Tables = append(ins.Tables, t)
+	}
+}
+
+func (ins *Inspector) InspectTables(tables ...string) {
+	for _, table := range tables {
+		rows, err := ins.db.Query(fmt.Sprintf("SHOW TABLES LIKE '%s'", table))
+		if err != nil {
+			log.Panic(err)
+		}
+		if rows.Next() {
+			t := ins.inspectTable(table)
+			ins.Tables = append(ins.Tables, t)
+		}
+		rows.Close()
 	}
 }
 
