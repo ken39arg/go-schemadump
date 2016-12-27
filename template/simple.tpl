@@ -1,4 +1,4 @@
-package schame 
+package schema
 
 import (
 	"database/sql"
