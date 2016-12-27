@@ -138,7 +138,7 @@ func parseSchameFile(schema string) []string {
 func writeBuffer(io *os.File, buf *bytes.Buffer) {
 	data, err := format.Source(buf.Bytes())
 	if err != nil {
-		log.Panicf("go fmt err: %s", err)
+		log.Panicf("go fmt err: %s \n%v", err, buf)
 	}
 	_, err = io.Write(data)
 	if err != nil {
