@@ -1,0 +1,16 @@
+*.*~
+*~
+
+*.o
+*.a
+*.so
+
+*.DS_Store
+Thumbs.db
+ehthumbs.db
+ehthumbs_vista.db
+*.tmp
+*.lnk
+._*
+
+tmp
