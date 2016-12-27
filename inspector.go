@@ -19,8 +19,8 @@ type Column struct {
 	Size     uint32
 	Default  string
 	Extra    string
-	dbName   string // original column_name
-	dbType   string // original type (show columns from *)
+	DBName   string // original column_name
+	DBType   string // original type (show columns from *)
 }
 
 type Index struct {
@@ -31,29 +31,15 @@ type Index struct {
 }
 
 type Table struct {
-	Name    string
-	dbName  string // original table name
-	Columns []Column
-	Indexes []Index
-}
-
-func (t Table) PrimaryKey() Index {
-	for _, idx := range t.Indexes {
-		if idx.Primary {
-			return idx
-		}
-	}
-	return Index{} // primary key 無し
-}
-
-func (t Table) NonPrimaryIndexes() []Index {
-	indexes := []Index{}
-	for _, idx := range t.Indexes {
-		if !idx.Primary {
-			indexes = append(indexes, idx)
-		}
-	}
-	return indexes
+	Name              string
+	DBName            string // original table name
+	Columns           []Column
+	Indexes           []Index
+	PrimaryKey        Index
+	NonPrimaryIndexes []Index
+	ColumnDBNames     []string
+	SelectFields      string
+	ScanFields        string
 }
 
 type Inspector struct {
@@ -100,10 +86,26 @@ func (ins *Inspector) InspectTables(tables ...string) {
 func (ins *Inspector) inspectTable(name string) Table {
 	t := Table{
 		Name:   snaker.SnakeToCamel(name),
-		dbName: name,
+		DBName: name,
 	}
 	t.Columns = ins.inspectColumns(name)
 	t.Indexes = ins.inspectIndex(name)
+	for _, idx := range t.Indexes {
+		if idx.Primary {
+			t.PrimaryKey = idx
+		} else {
+			t.NonPrimaryIndexes = append(t.NonPrimaryIndexes, idx)
+		}
+	}
+	for _, clm := range t.Columns {
+		t.ColumnDBNames = append(t.ColumnDBNames, clm.DBName)
+		if t.SelectFields != "" {
+			t.SelectFields += ","
+			t.ScanFields += ","
+		}
+		t.SelectFields += "`" + clm.DBName + "`"
+		t.ScanFields += "&r." + clm.Name
+	}
 	return t
 }
 
@@ -142,8 +144,8 @@ func (ins *Inspector) inspectColumns(table string) []Column {
 		}
 		c := Column{
 			Name:     snaker.SnakeToCamel(fName),
-			dbName:   fName,
-			dbType:   fType,
+			DBName:   fName,
+			DBType:   fType,
 			Nullable: fNull == "YES",
 			Extra:    fExtra,
 		}
