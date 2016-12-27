@@ -13,14 +13,15 @@ import (
 )
 
 type Column struct {
-	Name     string // UpperCamel Name  struct
-	Type     string
-	Nullable bool
-	Size     uint32
-	Default  string
-	Extra    string
-	DBName   string // original column_name
-	DBType   string // original type (show columns from *)
+	Name          string // UpperCamel Name  struct
+	Type          string
+	Nullable      bool
+	Size          uint32
+	Default       string
+	AutoIncrement bool
+	Extra         string
+	DBName        string // original column_name
+	DBType        string // original type (show columns from *)
 }
 
 type Index struct {
@@ -143,11 +144,12 @@ func (ins *Inspector) inspectColumns(table string) []Column {
 			log.Panic(err)
 		}
 		c := Column{
-			Name:     snaker.SnakeToCamel(fName),
-			DBName:   fName,
-			DBType:   fType,
-			Nullable: fNull == "YES",
-			Extra:    fExtra,
+			Name:          snaker.SnakeToCamel(fName),
+			DBName:        fName,
+			DBType:        fType,
+			Nullable:      fNull == "YES",
+			Extra:         fExtra,
+			AutoIncrement: strings.Index(fExtra, "auto_increment") != -1,
 		}
 		if fDef.Valid {
 			c.Default = fDef.String
